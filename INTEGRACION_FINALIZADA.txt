@@ -1,0 +1,105 @@
+✅ INTEGRACIÓN COMPLETADA - GESTORX-BACKEND DENTRO DE GESTORX
+================================================================
+
+📋 CAMBIOS REALIZADOS:
+
+1️⃣ URLs de API Actualizadas
+   ┌─────────────────────────────────────────────────────────┐
+   │ const API_URL = '/GestorX/gestorx-backend/api'          │
+   └─────────────────────────────────────────────────────────┘
+   
+   ✅ Login.vue
+   ✅ Register.vue
+   ✅ ListaUsuarios.vue
+   ✅ CrearUsuario.vue
+   ✅ EditarUsuario.vue
+   ✅ src/config/api.js
+
+2️⃣ Estructura de Carpetas
+   ┌─────────────────────────────────────────────────────────┐
+   │ GestorX/                    (Carpeta Principal)         │
+   │ ├── gestorx/                (Frontend Vue.js)           │
+   │ │   ├── src/                                            │
+   │ │   │   ├── config/api.js   ← URLs centralizadas       │
+   │ │   │   └── views/          ← Componentes actualizados  │
+   │ │   └── ...                                             │
+   │ │                                                        │
+   │ └── gestorx-backend/        (Backend PHP integrado) ✨  │
+   │     ├── api/                ← Endpoints                 │
+   │     ├── config/             ← DB                        │
+   │     └── ...                                             │
+   └─────────────────────────────────────────────────────────┘
+
+3️⃣ Cómo Funciona
+   
+   DESARROLLO:
+   ──────────
+   http://localhost:8081              (Vue.js Dev Server)
+            │
+            ▼ solicita
+   /GestorX/gestorx-backend/api/registro.php
+            │
+            ▼ resuelve a
+   http://localhost/GestorX/gestorx-backend/api/registro.php
+            │
+            ▼ Apache sirve
+   c:\xampp\htdocs\GestorX\gestorx-backend\api\registro.php
+
+   PRODUCCIÓN:
+   ──────────
+   https://tu-dominio.com
+            │
+            ▼
+   /GestorX/gestorx-backend/api/registro.php
+            │
+            ▼
+   https://tu-dominio.com/GestorX/gestorx-backend/api/registro.php
+
+4️⃣ ✨ Ventajas
+
+   ✓ Frontend y Backend en la misma carpeta de proyecto
+   ✓ URLs relativas (funciona en cualquier dominio)
+   ✓ Configuración centralizada (un solo lugar para URLs)
+   ✓ Fácil de desplegar (mueve GestorX y todo funciona)
+   ✓ Mejor organización y mantenibilidad
+
+================================================================
+
+🚀 PRÓXIMOS PASOS:
+
+1. Elimina la carpeta original:
+   c:\xampp\htdocs\gestorx-backend\  ← ELIMINAR
+
+2. Prueba la aplicación:
+   - Abre: http://localhost:8081/register
+   - DevTools F12 > Console
+   - Intenta registrarte
+   - Verifica en Network que las peticiones van a:
+     /GestorX/gestorx-backend/api/registro.php
+
+3. Si todo funciona:
+   ✅ Backend integrado correctamente
+   ✅ URLs apuntando al lugar correcto
+   ✅ Listo para desarrollo
+
+================================================================
+
+📊 VERIFICACIÓN RÁPIDA:
+
+URL Esperada:  /GestorX/gestorx-backend/api/registro.php
+Archivo Real:  c:\xampp\htdocs\GestorX\gestorx-backend\api\registro.php
+Status:        ✅ COINCIDE
+
+================================================================
+
+💡 RECUERDA:
+
+• El archivo de configuración es: src/config/api.js
+• Si necesitas cambiar la URL, edita ese archivo
+• No olvides eliminar la carpeta original de gestorx-backend
+• El backend debe tener CORS habilitado
+
+================================================================
+
+Creado: 14 de enero de 2026
+Versión: 1.0 - Integración Completada

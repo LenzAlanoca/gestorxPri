@@ -1,0 +1,187 @@
+   ✅ DATOS DE PRUEBA INICIALIZADOS AUTOMÁTICAMENTE
+================================================================
+
+📋 INFORMACIÓN DE USUARIO DE PRUEBA:
+
+┌─ USUARIO ADMINISTRADOR ──────────────────────────────────────┐
+│                                                                │
+│ Email:    admin@gestorx.test                                  │
+│ Password: Admin@2026                                           │
+│ Rol:      Superadministrador                                  │
+│ Empresa:  GestorX Demo                                         │
+│                                                                │
+│ Acceso total al sistema                                       │
+│ Crear usuarios, productos, gestionar todo                     │
+│                                                                │
+└────────────────────────────────────────────────────────────────┘
+
+┌─ USUARIOS ADICIONALES DE PRUEBA ─────────────────────────────┐
+│                                                                │
+│ 1. Gerente                                                     │
+│    Email:    gerente@gestorx.test                             │
+│    Password: Gerente@2026                                      │
+│    Rol:      Gerente (Ventas, Compras, Inventario)           │
+│                                                                │
+│ 2. Cajera                                                      │
+│    Email:    cajera@gestorx.test                              │
+│    Password: Cajera@2026                                       │
+│    Rol:      Cajero (Crear ventas)                            │
+│                                                                │
+│ 3. Almacén                                                     │
+│    Email:    almacen@gestorx.test                             │
+│    Password: Almacen@2026                                      │
+│    Rol:      Almacenero (Control inventario)                  │
+│                                                                │
+└────────────────────────────────────────────────────────────────┘
+
+================================================================
+
+📦 DATOS CREADOS:
+
+✅ PLANES DE SUSCRIPCIÓN (3)
+   • Plan Básico - Gratis
+   • Plan Pro - $49.99/mes
+   • Plan Enterprise - $199.99/mes
+
+✅ ROLES (5)
+   • Superadministrador
+   • Administrador
+   • Gerente
+   • Cajero
+   • Almacenero
+
+✅ PERMISOS (18)
+   • Usuarios: crear, editar, eliminar, listar
+   • Productos: crear, editar, eliminar, listar
+   • Ventas: crear, listar, anular
+   • Compras: crear, listar, anular
+   • Inventario: ver, ajustar
+   • Reportes: ver, exportar
+
+✅ EMPRESA DE PRUEBA
+   • Nombre: GestorX Demo
+   • Razón Social: GestorX SAS
+   • Dirección: Av. Principal 123
+   • Teléfono: (+51) 987654321
+   • Email: admin@gestorx.test
+   • Moneda: PEN (Soles)
+   • Impuesto: 18%
+
+✅ UNIDADES DE MEDIDA (7)
+   • Unidad
+   • Kilogramo
+   • Litro
+   • Metro
+   • Metro Cuadrado
+   • Docena
+   • Caja
+
+✅ CATEGORÍAS DE PRODUCTOS (6)
+   • Electrónica
+   • Ropa y Accesorios
+   • Alimentos y Bebidas
+   • Hogar y Jardín
+   • Deportes
+   • Belleza y Cuidado Personal
+
+✅ PROVEEDORES (3)
+   • Proveedor Latino
+   • Importaciones Asia
+   • Distribuidora Nacional
+
+✅ PRODUCTOS DE PRUEBA (8)
+   Electrónica:
+   • Laptop Dell XPS - S/. 1,500.00 (10 unidades)
+   • Mouse Inalámbrico - S/. 25.00 (50 unidades)
+   • Teclado Mecánico - S/. 80.00 (15 unidades)
+   • Monitor 27 pulgadas - S/. 350.00 (8 unidades)
+   
+   Ropa:
+   • Camiseta Básica - S/. 15.00 (100 unidades)
+   • Pantalón Jeans - S/. 45.00 (75 unidades)
+   
+   Alimentos:
+   • Café Premium 500g - S/. 18.50 (200 unidades)
+   • Chocolate Belga - S/. 12.00 (150 unidades)
+
+================================================================
+
+🚀 CÓMO ACCEDER:
+
+1. Abre: http://localhost:8081
+2. Ve a: Login o Register
+3. Usa las credenciales:
+   
+   Email:    admin@gestorx.test
+   Password: Admin@2026
+
+4. ¡Listo! Acceso total al sistema
+
+================================================================
+
+🧪 QUÉ PUEDES PROBAR:
+
+✅ Dashboard
+   • Ver información de la empresa
+   • Estadísticas básicas
+
+✅ Gestión de Usuarios
+   • Ver lista de usuarios
+   • Crear nuevos usuarios
+   • Editar usuarios existentes
+   • Asignar roles
+
+✅ Inventario
+   • Ver productos disponibles
+   • Consultar stock
+   • Categorías de productos
+
+✅ Cambiar de Rol
+   • Cambia la contraseña del usuario logueado
+   • Prueba con diferentes roles para ver permisos
+
+================================================================
+
+📊 INFORMACIÓN TÉCNICA:
+
+• Las tablas se crean automáticamente al iniciar
+• Los datos de prueba se insertan solo si no existen
+• No se recrean en inicios posteriores
+• Puedes crear más datos directamente en la app
+• Todos los datos son reversibles (puedes eliminarlos)
+
+================================================================
+
+🔐 SEGURIDAD:
+
+⚠️ IMPORTANTE - CAMBIAR EN PRODUCCIÓN:
+• Cambiar todas las contraseñas
+• Crear nuevos usuarios
+• Eliminar usuarios de prueba
+• Cambiar email de admin@gestorx.test
+
+Las contraseñas de prueba solo son para desarrollo.
+
+================================================================
+
+💾 BASE DE DATOS:
+
+Nombre: gestorxbd
+Tablas: 15
+Registros iniciales: ~50
+
+Puedes ver todo en phpMyAdmin:
+http://localhost/phpmyadmin
+
+Usuario: root
+Contraseña: (vacía por defecto en XAMPP)
+
+================================================================
+
+✅ TODO CONFIGURADO Y LISTO PARA USAR
+
+Inicia el servidor:
+npm run serve
+
+Y abre:
+http://localhost:8081

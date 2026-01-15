@@ -1,0 +1,108 @@
+✅ CORRECCIONES REALIZADAS EN DATABASE_SCHEMA.sql
+================================================================
+
+📋 CAMBIOS APLICADOS:
+
+1️⃣ COMENTARIOS MEJORADOS
+   ❌ Antes:  PLAN, EMPRESA, ROL, etc.
+   ✅ Después: -- TABLA: PLAN, -- TABLA: EMPRESA, etc.
+
+2️⃣ AGREGADAS RESTRICCIONES DE INTEGRIDAD REFERENCIAL
+   
+   Ahora todas las Foreign Keys tienen:
+   - ON DELETE CASCADE (elimina referencias relacionadas)
+   - ON DELETE SET NULL (anula la referencia)
+   - ON DELETE RESTRICT (previene eliminación)
+   
+   Ejemplos:
+   ✅ FOREIGN KEY (id_plan) REFERENCES plan(id_plan) ON DELETE SET NULL
+   ✅ FOREIGN KEY (id_empresa) REFERENCES empresa(id_empresa) ON DELETE CASCADE
+   ✅ FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE RESTRICT
+
+3️⃣ ELIMINADO CÓDIGO DUPLICADO
+   ❌ Había tablas repetidas (DETALLE_COMPRA, MOVIMIENTO_INVENTARIO, NOTIFICACION)
+   ✅ Ahora solo aparecen una vez
+
+4️⃣ COMENTARIOS DE CLARIDAD
+   ✅ Cada CREATE TABLE tiene: -- TABLA: nombre_tabla
+
+================================================================
+
+📊 ESTRUCTURA DE RESTRICCIONES FINALES:
+
+┌─ CASCADE (Delete On Cascade) ────────────────────────────────┐
+│ Se eliminan los registros relacionados cuando se borra el    │
+│ registro principal.                                           │
+│                                                               │
+│ Tablas con CASCADE:                                           │
+│  • empresa.id_plan → plan(CASCADE) [permite DELETE]          │
+│  • usuario → empresa, rol                                    │
+│  • cliente → empresa                                         │
+│  • proveedor → empresa                                       │
+│  • categoria → empresa                                       │
+│  • producto → empresa, categoria                             │
+│  • venta → empresa                                           │
+│  • compra → empresa                                          │
+│  • detalle_venta → venta                                     │
+│  • detalle_compra → compra                                   │
+│  • movimiento_inventario → producto                          │
+│  • notificacion → empresa, usuario                           │
+└──────────────────────────────────────────────────────────────┘
+
+┌─ SET NULL (Delete Set Null) ─────────────────────────────────┐
+│ La referencia se anula (NULL) cuando se borra el principal.   │
+│                                                               │
+│ Tablas con SET NULL:                                          │
+│  • empresa.id_plan (empresa puede existir sin plan)          │
+│  • producto.id_categoria (producto sin categoria)            │
+└──────────────────────────────────────────────────────────────┘
+
+┌─ RESTRICT (Prevent Delete) ──────────────────────────────────┐
+│ Impide eliminar si hay referencias activas.                  │
+│ Previene accidentalmente borrar usuarios, clientes, etc.     │
+│                                                               │
+│ Tablas con RESTRICT:                                          │
+│  • usuario.id_rol (no puedes borrar un rol con usuarios)    │
+│  • venta.id_usuario (no puedes borrar usuario con ventas)   │
+│  • venta.id_cliente (no puedes borrar cliente con ventas)   │
+│  • compra.id_proveedor                                       │
+│  • compra.id_usuario                                         │
+│  • detalle_venta.id_producto                                │
+│  • detalle_compra.id_producto                                │
+│  • movimiento_inventario.id_usuario                          │
+│  • producto.id_unidad (no puedes borrar unidades en uso)    │
+└──────────────────────────────────────────────────────────────┘
+
+================================================================
+
+🎯 BENEFICIOS DE ESTAS CORRECCIONES:
+
+✅ Integridad referencial: Evita datos huérfanos
+✅ Coherencia: CASCADE para datos dependientes
+✅ Seguridad: RESTRICT para datos críticos
+✅ Flexibilidad: SET NULL para datos opcionales
+✅ Claridad: Código comentado y bien estructurado
+
+================================================================
+
+📝 PRÓXIMOS PASOS PARA USAR ESTE SCHEMA:
+
+1. Crear base de datos:
+   CREATE DATABASE gestorx CHARACTER SET utf8mb4;
+
+2. Usar la base de datos:
+   USE gestorx;
+
+3. Ejecutar este script:
+   SOURCE /ruta/DATABASE_SCHEMA.sql;
+   
+   O copiar y ejecutar en phpMyAdmin
+
+4. Insertar datos iniciales (planes, roles, permisos)
+
+5. Verificar que las tablas se crearon:
+   SHOW TABLES;
+
+================================================================
+
+✨ ESTADO: SCHEMA CORREGIDO Y LISTO PARA USAR
