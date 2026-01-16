@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Token Storage</title>
+    <style>
+        body { font-family: monospace; background: #1e1e1e; color: #00ff00; padding: 20px; }
+        .box { background: #0d1117; padding: 15px; margin: 10px 0; border: 1px solid #30363d; border-radius: 5px; }
+        button { padding: 10px 20px; background: #238636; color: white; border: none; cursor: pointer; border-radius: 3px; margin: 5px; }
+        .output { background: #0d1117; padding: 15px; margin-top: 10px; border: 1px solid #30363d; max-height: 400px; overflow-y: auto; white-space: pre-wrap; word-break: break-all; }
+        h1 { color: #58a6ff; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Debug Token Storage</h1>
+
+    <div class="box">
+        <h3>1. Verificar LocalStorage Ahora</h3>
+        <button onclick="verifyNow()">Ver Contenido</button>
+        <div id="verify-output" class="output" style="display:none;"></div>
+    </div>
+
+    <div class="box">
+        <h3>2. Test de Token en Request</h3>
+        <button onclick="testDebugToken()">Test Debug Token</button>
+        <div id="test-output" class="output" style="display:none;"></div>
+    </div>
+
+    <script>
+        function verifyNow() {
+            const output = document.getElementById('verify-output');
+            output.style.display = 'block';
+            
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+            
+            let content = '=== LOCALSTORAGE ===\n\n';
+            
+            if (token) {
+                content += `✅ TOKEN PRESENTE (${token.length} chars)\n`;
+                content += `Primeros 80: ${token.substring(0, 80)}\n`;
+                content += `Últimos 40: ${token.substring(token.length - 40)}\n\n`;
+            } else {
+                content += '❌ SIN TOKEN\n\n';
+            }
+            
+            if (user) {
+                try {
+                    const userObj = JSON.parse(user);
+                    content += `✅ USUARIO:\n${JSON.stringify(userObj, null, 2)}\n`;
+                } catch (e) {
+                    content += `⚠️ Usuario no es JSON válido: ${user}\n`;
+                }
+            } else {
+                content += '❌ SIN USUARIO\n';
+            }
+            
+            output.textContent = content;
+        }
+
+        async function testDebugToken() {
+            const output = document.getElementById('test-output');
+            output.style.display = 'block';
+            output.textContent = '⏳ Enviando request...';
+            
+            const token = localStorage.getItem('token');
+            
+            if (!token) {
+                output.textContent = '❌ No hay token en localStorage';
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost/GestorX/gestorx-backend/api/debug-token.php', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                output.textContent = JSON.stringify(data, null, 2);
+                
+            } catch (error) {
+                output.textContent = '❌ Error: ' + error.message;
+            }
+        }
+        
+        // Auto-verify on load
+        window.addEventListener('load', verifyNow);
+    </script>
+</body>
+</html>

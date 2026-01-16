@@ -19,11 +19,19 @@ class AuthMiddleware
      */
     private function getHeaders()
     {
+        // Primero intentar con apache_request_headers si está disponible
         if (function_exists('apache_request_headers')) {
-            return \apache_request_headers();
+            try {
+                $headers = \apache_request_headers();
+                if ($headers !== false) {
+                    return $headers;
+                }
+            } catch (Exception $e) {
+                // Si falla, continuar con el método alternativo
+            }
         }
 
-        // Para CLI o servidores sin apache_request_headers
+        // Método alternativo: buscar en $_SERVER
         $headers = [];
 
         // Buscar en $_SERVER las claves HTTP_*
@@ -35,7 +43,7 @@ class AuthMiddleware
             }
         }
 
-        // También revisar AUTHORIZATION directamente (algunos servidores lo ponen así)
+        // También revisar AUTHORIZATION directamente
         if (isset($_SERVER['AUTHORIZATION'])) {
             $headers['Authorization'] = $_SERVER['AUTHORIZATION'];
         }
