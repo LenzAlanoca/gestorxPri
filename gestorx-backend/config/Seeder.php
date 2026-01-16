@@ -95,6 +95,12 @@ class Seeder
     private function seedPermisos()
     {
         $permisos = [
+            // Módulo Control Maestro (Nuevos permisos para superadmin)
+            ['nombre_permiso' => 'listar_empresas', 'modulo' => 'control_maestro', 'descripcion' => 'Listar todas las empresas'],
+            ['nombre_permiso' => 'ver_usuarios_empresa', 'modulo' => 'control_maestro', 'descripcion' => 'Ver usuarios de cualquier empresa'],
+            ['nombre_permiso' => 'desactivar_empresa', 'modulo' => 'control_maestro', 'descripcion' => 'Desactivar/Activar empresa'],
+            ['nombre_permiso' => 'acceso_control_maestro', 'modulo' => 'control_maestro', 'descripcion' => 'Acceso al Control Maestro'],
+
             // Módulo Usuarios
             ['nombre_permiso' => 'crear_usuario', 'modulo' => 'usuarios', 'descripcion' => 'Crear nuevos usuarios'],
             ['nombre_permiso' => 'editar_usuario', 'modulo' => 'usuarios', 'descripcion' => 'Editar usuarios'],
@@ -255,12 +261,30 @@ class Seeder
 
     /**
      * Crea empresa y usuario de prueba
-     * Email: admin@gestorx.test
-     * Password: Admin@2026
+     * También crea usuario Control Maestro
+     * 
+     * Usuarios de prueba:
+     * - CONTROL MAESTRO: maestro@gestorx.test / Maestro@2026
+     * - ADMIN EMPRESA: admin@gestorx.test / Admin@2026
+     * - GERENTE: gerente@gestorx.test / Gerente@2026
+     * - CAJERA: cajera@gestorx.test / Cajera@2026
+     * - ALMACÉN: almacen@gestorx.test / Almacen@2026
      */
     private function seedEmpresaPrueba()
     {
-        // Crear empresa de prueba
+        // PRIMERO: Crear usuario Control Maestro (SIN EMPRESA)
+        $password_hash = password_hash('Maestro@2026', PASSWORD_BCRYPT);
+        $usuario_query = "INSERT INTO usuario 
+                         (id_empresa, id_rol, nombre, apellido, correo, password_hash, estado_usuario, fecha_creacion)
+                         VALUES 
+                         (NULL, 1, 'Control', 'Maestro', 'maestro@gestorx.test', :password, 'activo', NOW())";
+
+        $stmt = $this->connection->prepare($usuario_query);
+        $stmt->execute([
+            ':password' => $password_hash
+        ]);
+
+        // SEGUNDO: Crear empresa de prueba
         $empresa_query = "INSERT INTO empresa 
                         (nombre_comercial, razon_social, direccion, telefono, correo_contacto, moneda, impuesto, stock_minimo_default, estado_empresa, fecha_registro, fecha_expiracion_suscripcion)
                         VALUES 
@@ -274,7 +298,7 @@ class Seeder
         $usuario_query = "INSERT INTO usuario 
                          (id_empresa, id_rol, nombre, apellido, correo, password_hash, estado_usuario, fecha_creacion)
                          VALUES 
-                         (:id_empresa, 1, 'Admin', 'GestorX', 'admin@gestorx.test', :password, 'activo', NOW())";
+                         (:id_empresa, 2, 'Admin', 'GestorX', 'admin@gestorx.test', :password, 'activo', NOW())";
 
         $stmt = $this->connection->prepare($usuario_query);
         $stmt->execute([

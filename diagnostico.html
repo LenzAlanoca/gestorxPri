@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Diagnóstico - Error al Cargar Empresas</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        .container { 
+            max-width: 1000px; 
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 { color: #333; margin-bottom: 20px; }
+        .section { margin: 20px 0; padding: 15px; background: #f9f9f9; border-left: 4px solid #007bff; border-radius: 5px; }
+        .section h2 { color: #007bff; font-size: 1.2rem; margin-bottom: 10px; }
+        button {
+            padding: 10px 20px;
+            margin: 5px 5px 5px 0;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover { background: #0056b3; }
+        button.danger { background: #dc3545; }
+        button.danger:hover { background: #c82333; }
+        .output {
+            background: #1e1e1e;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .error { color: #ff6b6b; }
+        .success { color: #51cf66; }
+        .warning { color: #ffd43b; }
+        .info { color: #74c0fc; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th { background: #f0f0f0; font-weight: bold; }
+        .status-ok { color: #51cf66; font-weight: bold; }
+        .status-error { color: #ff6b6b; font-weight: bold; }
+        .status-warning { color: #ffd43b; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Diagnóstico - Error al Cargar Empresas</h1>
+
+        <div class="section">
+            <h2>1️⃣ Verificar LocalStorage</h2>
+            <button onclick="verificarLocalStorage()">Verificar Datos Guardados</button>
+            <div id="localStorage-output" class="output" style="display:none;"></div>
+        </div>
+
+        <div class="section">
+            <h2>2️⃣ Hacer Login</h2>
+            <button onclick="hacerLogin()">Login maestro@gestorx.test</button>
+            <div id="login-output" class="output" style="display:none;"></div>
+        </div>
+
+        <div class="section">
+            <h2>3️⃣ Test de Conectividad</h2>
+            <button onclick="testConectividad()">Test Conectividad al Backend</button>
+            <div id="conectividad-output" class="output" style="display:none;"></div>
+        </div>
+
+        <div class="section">
+            <h2>4️⃣ Cargar Empresas (Sin Token)</h2>
+            <button onclick="cargarEmpresasSinToken()">Intentar sin Token</button>
+            <div id="sin-token-output" class="output" style="display:none;"></div>
+        </div>
+
+        <div class="section">
+            <h2>5️⃣ Cargar Empresas (Con Token)</h2>
+            <button onclick="cargarEmpresas()">Cargar Empresas CON Token</button>
+            <div id="empresas-output" class="output" style="display:none;"></div>
+        </div>
+
+        <div class="section">
+            <h2>6️⃣ Diagnóstico Completo</h2>
+            <button onclick="diagnosticoCompleto()">Ejecutar Diagnóstico Completo</button>
+            <button class="danger" onclick="limpiarDatos()">Limpiar Todos los Datos</button>
+            <div id="completo-output" class="output" style="display:none;"></div>
+        </div>
+
+        <div class="section">
+            <h2>📊 Estado del Sistema</h2>
+            <div id="estado-tabla"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/GestorX/gestorx-backend/api';
+        let token = localStorage.getItem('token');
+        let user = JSON.parse(localStorage.getItem('user') || '{}');
+
+        function mostrar(elementId, contenido) {
+            const elemento = document.getElementById(elementId);
+            elemento.textContent = contenido;
+            elemento.style.display = 'block';
+            elemento.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function agregarLinea(elementId, linea, tipo = 'info') {
+            const elemento = document.getElementById(elementId);
+            if (!elemento.style.display || elemento.style.display === 'none') {
+                elemento.style.display = 'block';
+            }
+            const span = document.createElement('div');
+            span.className = tipo;
+            span.textContent = linea;
+            elemento.appendChild(span);
+            elemento.scrollTop = elemento.scrollHeight;
+        }
+
+        function limpiarOutput(elementId) {
+            const elemento = document.getElementById(elementId);
+            elemento.innerHTML = '';
+            elemento.style.display = 'none';
+        }
+
+        function verificarLocalStorage() {
+            limpiarOutput('localStorage-output');
+            const token = localStorage.getItem('token');
+            const user = localStorage.getItem('user');
+
+            agregarLinea('localStorage-output', '=== VERIFICAR LOCALSTORAGE ===', 'info');
+            
+            if (token) {
+                agregarLinea('localStorage-output', `✅ Token encontrado (${token.length} caracteres)`, 'success');
+                agregarLinea('localStorage-output', `Token (primeros 60 chars): ${token.substring(0, 60)}...`, 'info');
+            } else {
+                agregarLinea('localStorage-output', '❌ NO hay token en localStorage', 'error');
+            }
+
+            agregarLinea('localStorage-output', '', 'info');
+
+            if (user) {
+                const userObj = JSON.parse(user);
+                agregarLinea('localStorage-output', '✅ Usuario encontrado:', 'success');
+                agregarLinea('localStorage-output', JSON.stringify(userObj, null, 2), 'info');
+            } else {
+                agregarLinea('localStorage-output', '❌ NO hay usuario en localStorage', 'error');
+            }
+
+            actualizarEstadoSistema();
+        }
+
+        async function hacerLogin() {
+            limpiarOutput('login-output');
+            agregarLinea('login-output', '=== INTENTANDO LOGIN ===', 'info');
+
+            try {
+                agregarLinea('login-output', `URL: ${API_URL}/auth.php`, 'info');
+                agregarLinea('login-output', 'Método: POST', 'info');
+                agregarLinea('login-output', 'Datos: email=maestro@gestorx.test, password=***', 'info');
+                agregarLinea('login-output', '', 'info');
+
+                const response = await fetch(`${API_URL}/auth.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'login',
+                        correo: 'maestro@gestorx.test',
+                        password: 'Maestro@2026'
+                    })
+                });
+
+                agregarLinea('login-output', `Status HTTP: ${response.status}`, 'info');
+                agregarLinea('login-output', '', 'info');
+
+                const data = await response.json();
+
+                if (data.success) {
+                    agregarLinea('login-output', '✅ LOGIN EXITOSO', 'success');
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('user', JSON.stringify(data.user));
+                    token = data.token;
+                    user = data.user;
+                    agregarLinea('login-output', `Token guardado: ${data.token.substring(0, 50)}...`, 'success');
+                    agregarLinea('login-output', `Usuario: ${JSON.stringify(data.user, null, 2)}`, 'info');
+                } else {
+                    agregarLinea('login-output', `❌ ERROR: ${data.message}`, 'error');
+                }
+
+                actualizarEstadoSistema();
+            } catch (error) {
+                agregarLinea('login-output', `❌ ERROR: ${error.message}`, 'error');
+                if (error.stack) {
+                    agregarLinea('login-output', `Stack: ${error.stack}`, 'error');
+                }
+            }
+        }
+
+        async function testConectividad() {
+            limpiarOutput('conectividad-output');
+            agregarLinea('conectividad-output', '=== TEST DE CONECTIVIDAD ===', 'info');
+
+            try {
+                agregarLinea('conectividad-output', `Intentando conectar a: ${API_URL}`, 'info');
+                const response = await fetch(`${API_URL}/auth.php`, {
+                    method: 'OPTIONS',
+                });
+
+                agregarLinea('conectividad-output', `✅ Conexión OK (HTTP ${response.status})`, 'success');
+            } catch (error) {
+                agregarLinea('conectividad-output', `❌ NO hay conexión: ${error.message}`, 'error');
+            }
+        }
+
+        async function cargarEmpresasSinToken() {
+            limpiarOutput('sin-token-output');
+            agregarLinea('sin-token-output', '=== CARGAR EMPRESAS SIN TOKEN ===', 'info');
+
+            try {
+                const response = await fetch(`${API_URL}/empresas.php`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                agregarLinea('sin-token-output', `Status: ${response.status}`, 'info');
+                const data = await response.json();
+
+                if (response.status === 401) {
+                    agregarLinea('sin-token-output', '✅ Correcto: Rechaza sin token (401)', 'success');
+                } else {
+                    agregarLinea('sin-token-output', '⚠️ Sin token pero aceptó request', 'warning');
+                }
+
+                agregarLinea('sin-token-output', `Respuesta: ${JSON.stringify(data, null, 2)}`, 'info');
+            } catch (error) {
+                agregarLinea('sin-token-output', `❌ ERROR: ${error.message}`, 'error');
+            }
+        }
+
+        async function cargarEmpresas() {
+            limpiarOutput('empresas-output');
+            agregarLinea('empresas-output', '=== CARGAR EMPRESAS CON TOKEN ===', 'info');
+
+            if (!token) {
+                agregarLinea('empresas-output', '❌ NO hay token disponible', 'error');
+                agregarLinea('empresas-output', 'Primero haz login', 'warning');
+                return;
+            }
+
+            try {
+                agregarLinea('empresas-output', `URL: ${API_URL}/empresas.php`, 'info');
+                agregarLinea('empresas-output', `Token: ${token.substring(0, 50)}...`, 'info');
+                agregarLinea('empresas-output', '', 'info');
+
+                const response = await fetch(`${API_URL}/empresas.php`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                agregarLinea('empresas-output', `Status HTTP: ${response.status}`, 'info');
+                agregarLinea('empresas-output', '', 'info');
+
+                const data = await response.json();
+
+                if (data.success) {
+                    agregarLinea('empresas-output', `✅ EMPRESAS CARGADAS: ${data.total} encontradas`, 'success');
+                    agregarLinea('empresas-output', '', 'info');
+                    data.data.forEach(emp => {
+                        agregarLinea('empresas-output', `📌 ${emp.nombre_comercial} (ID: ${emp.id_empresa}, Usuarios: ${emp.total_usuarios}, Estado: ${emp.estado_empresa})`, 'success');
+                    });
+                } else {
+                    agregarLinea('empresas-output', `❌ ERROR: ${data.error}`, 'error');
+                }
+
+                agregarLinea('empresas-output', '', 'info');
+                agregarLinea('empresas-output', 'Respuesta JSON completa:', 'info');
+                agregarLinea('empresas-output', JSON.stringify(data, null, 2), 'info');
+            } catch (error) {
+                agregarLinea('empresas-output', `❌ ERROR DE FETCH: ${error.message}`, 'error');
+                if (error.stack) {
+                    agregarLinea('empresas-output', `Stack: ${error.stack}`, 'error');
+                }
+            }
+        }
+
+        async function diagnosticoCompleto() {
+            limpiarOutput('completo-output');
+
+            agregarLinea('completo-output', '╔════════════════════════════════════════╗', 'info');
+            agregarLinea('completo-output', '║  DIAGNÓSTICO COMPLETO DEL SISTEMA     ║', 'info');
+            agregarLinea('completo-output', '╚════════════════════════════════════════╝', 'info');
+            agregarLinea('completo-output', '', 'info');
+
+            // 1. Estado local
+            agregarLinea('completo-output', '1️⃣  ESTADO LOCAL', 'info');
+            const localToken = localStorage.getItem('token');
+            const localUser = localStorage.getItem('user');
+            agregarLinea('completo-output', `   Token: ${localToken ? 'SÍ ✅' : 'NO ❌'}`, localToken ? 'success' : 'error');
+            agregarLinea('completo-output', `   Usuario: ${localUser ? 'SÍ ✅' : 'NO ❌'}`, localUser ? 'success' : 'error');
+            agregarLinea('completo-output', '', 'info');
+
+            // 2. Conectividad
+            agregarLinea('completo-output', '2️⃣  CONECTIVIDAD', 'info');
+            try {
+                const response = await fetch(`${API_URL}/auth.php`, { method: 'OPTIONS' });
+                agregarLinea('completo-output', `   Backend: CONECTADO ✅`, 'success');
+            } catch (e) {
+                agregarLinea('completo-output', `   Backend: DESCONECTADO ❌ (${e.message})`, 'error');
+            }
+            agregarLinea('completo-output', '', 'info');
+
+            // 3. Seguridad (sin token)
+            agregarLinea('completo-output', '3️⃣  SEGURIDAD (Sin Token)', 'info');
+            try {
+                const response = await fetch(`${API_URL}/empresas.php`, { method: 'GET' });
+                agregarLinea('completo-output', `   Rechaza sin token: ${response.status === 401 ? 'SÍ ✅' : 'NO ❌ (Seguridad baja)'}`, response.status === 401 ? 'success' : 'error');
+            } catch (e) {
+                agregarLinea('completo-output', `   Error: ${e.message}`, 'error');
+            }
+            agregarLinea('completo-output', '', 'info');
+
+            // 4. Datos (con token)
+            agregarLinea('completo-output', '4️⃣  DATOS (Con Token)', 'info');
+            if (!localToken) {
+                agregarLinea('completo-output', '   ⚠️  No hay token. Haz login primero.', 'warning');
+            } else {
+                try {
+                    const response = await fetch(`${API_URL}/empresas.php`, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': `Bearer ${localToken}`,
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                        agregarLinea('completo-output', `   Empresas: ${data.total} encontradas ✅`, 'success');
+                        data.data.forEach(emp => {
+                            agregarLinea('completo-output', `      • ${emp.nombre_comercial} (${emp.total_usuarios} usuarios)`, 'info');
+                        });
+                    } else {
+                        agregarLinea('completo-output', `   Error: ${data.error} ❌`, 'error');
+                    }
+                } catch (e) {
+                    agregarLinea('completo-output', `   Error: ${e.message} ❌`, 'error');
+                }
+            }
+
+            agregarLinea('completo-output', '', 'info');
+            agregarLinea('completo-output', '╚════════════════════════════════════════╝', 'info');
+
+            actualizarEstadoSistema();
+        }
+
+        function limpiarDatos() {
+            if (confirm('¿Estás seguro de que deseas limpiar TODOS los datos de localStorage?')) {
+                localStorage.clear();
+                token = null;
+                user = null;
+                agregarLinea('completo-output', '🗑️  LocalStorage limpiado', 'warning');
+                actualizarEstadoSistema();
+                alert('✅ Datos limpiados. Recarga la página.');
+            }
+        }
+
+        function actualizarEstadoSistema() {
+            const tabla = document.getElementById('estado-tabla');
+            const localToken = localStorage.getItem('token');
+            const localUser = JSON.parse(localStorage.getItem('user') || '{}');
+
+            tabla.innerHTML = `
+                <table>
+                    <tr>
+                        <th>Parámetro</th>
+                        <th>Estado</th>
+                        <th>Valor</th>
+                    </tr>
+                    <tr>
+                        <td>Token JWT</td>
+                        <td class="${localToken ? 'status-ok' : 'status-error'}">${localToken ? '✅ Presente' : '❌ Ausente'}</td>
+                        <td>${localToken ? localToken.substring(0, 50) + '...' : 'N/A'}</td>
+                    </tr>
+                    <tr>
+                        <td>Usuario Email</td>
+                        <td class="${localUser.correo ? 'status-ok' : 'status-error'}">${localUser.correo ? '✅ Presente' : '❌ Ausente'}</td>
+                        <td>${localUser.correo || 'N/A'}</td>
+                    </tr>
+                    <tr>
+                        <td>Usuario Rol</td>
+                        <td class="${localUser.rol ? 'status-ok' : 'status-error'}">${localUser.rol ? '✅ Presente' : '❌ Ausente'}</td>
+                        <td>${localUser.rol || 'N/A'}</td>
+                    </tr>
+                    <tr>
+                        <td>ID Empresa</td>
+                        <td class="${localUser.id_empresa === null ? 'status-ok' : (localUser.id_empresa ? 'status-ok' : 'status-warning')}">${localUser.id_empresa === null ? '✅ NULL (Control Maestro)' : (localUser.id_empresa ? '✅ ' + localUser.id_empresa : '⚠️ Ausente')}</td>
+                        <td>${localUser.id_empresa === null ? 'Control Maestro' : (localUser.id_empresa || 'N/A')}</td>
+                    </tr>
+                    <tr>
+                        <td>API Base URL</td>
+                        <td class="status-ok">✅ Configurada</td>
+                        <td>${API_URL}</td>
+                    </tr>
+                </table>
+            `;
+        }
+
+        // Inicializar estado al cargar
+        actualizarEstadoSistema();
+    </script>
+</body>
+</html>

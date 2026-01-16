@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test - API Empresas</title>
+    <style>
+        body { font-family: Arial; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .result { background: #f0f0f0; padding: 15px; margin-top: 20px; border-radius: 5px; }
+        pre { background: #fff; padding: 10px; border: 1px solid #ddd; overflow-x: auto; }
+        .error { color: red; }
+        .success { color: green; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test - API de Empresas</h1>
+        
+        <h2>1. Test de Autenticación</h2>
+        <button onclick="testLogin()">Login maestro@gestorx.test</button>
+        
+        <h2>2. Test de Listar Empresas</h2>
+        <button onclick="testListarEmpresas()">Listar Empresas</button>
+        
+        <h2>3. Test de Listar Usuarios</h2>
+        <button onclick="testListarUsuarios()">Listar Usuarios Empresa 1</button>
+        
+        <div id="resultado" class="result" style="display:none;">
+            <h3>Resultado:</h3>
+            <pre id="contenido"></pre>
+        </div>
+    </div>
+
+    <script>
+        let token = localStorage.getItem('token');
+
+        async function testLogin() {
+            try {
+                const response = await fetch('http://localhost/GestorX/gestorx-backend/api/auth.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'login',
+                        correo: 'maestro@gestorx.test',
+                        password: 'Maestro@2026'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    token = data.token;
+                    localStorage.setItem('token', token);
+                    mostrarResultado('✅ LOGIN EXITOSO\n\nToken: ' + token.substring(0, 50) + '...\n\nUsuario:\n' + JSON.stringify(data.user, null, 2), true);
+                } else {
+                    mostrarResultado('❌ ERROR: ' + data.message, false);
+                }
+            } catch (error) {
+                mostrarResultado('❌ ERROR: ' + error.message, false);
+            }
+        }
+
+        async function testListarEmpresas() {
+            if (!token) {
+                mostrarResultado('❌ ERROR: No hay token. Primero haz login.', false);
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost/GestorX/gestorx-backend/api/empresas.php', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarResultado('✅ EMPRESAS CARGADAS\n\n' + JSON.stringify(data, null, 2), true);
+                } else {
+                    mostrarResultado('❌ ERROR: ' + data.error, false);
+                }
+            } catch (error) {
+                mostrarResultado('❌ ERROR: ' + error.message, false);
+            }
+        }
+
+        async function testListarUsuarios() {
+            if (!token) {
+                mostrarResultado('❌ ERROR: No hay token. Primero haz login.', false);
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost/GestorX/gestorx-backend/api/empresas.php?usuarios=1', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    mostrarResultado('✅ USUARIOS CARGADOS\n\n' + JSON.stringify(data, null, 2), true);
+                } else {
+                    mostrarResultado('❌ ERROR: ' + data.error, false);
+                }
+            } catch (error) {
+                mostrarResultado('❌ ERROR: ' + error.message, false);
+            }
+        }
+
+        function mostrarResultado(texto, esExito) {
+            const resultado = document.getElementById('resultado');
+            const contenido = document.getElementById('contenido');
+            contenido.textContent = texto;
+            contenido.className = esExito ? 'success' : 'error';
+            resultado.style.display = 'block';
+        }
+
+        // Si ya hay token, mostrar que está disponible
+        if (token) {
+            console.log('Token encontrado:', token.substring(0, 50) + '...');
+        }
+    </script>
+</body>
+</html>
