@@ -67,10 +67,13 @@ class Usuario
 
     public function login($correo, $password)
     {
-        $query = "SELECT u.*, r.nombre_rol, e.nombre_comercial 
+        // Para Control Maestro (id_empresa es NULL)
+        $query = "SELECT u.*, r.nombre_rol, 
+                         IF(u.id_empresa IS NULL, 'Control Maestro', e.nombre_comercial) as nombre_comercial,
+                         e.estado_empresa
                   FROM " . $this->table . " u
                   INNER JOIN rol r ON u.id_rol = r.id_rol
-                  INNER JOIN empresa e ON u.id_empresa = e.id_empresa
+                  LEFT JOIN empresa e ON u.id_empresa = e.id_empresa
                   WHERE u.correo = :correo AND u.estado_usuario = 'activo'";
 
         $stmt = $this->conn->prepare($query);
@@ -79,6 +82,11 @@ class Usuario
 
         if ($stmt->rowCount() > 0) {
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // Verificar que la empresa esté activa (solo si no es Control Maestro)
+            if ($row['id_empresa'] !== null && $row['estado_empresa'] !== 'activa') {
+                return false;
+            }
 
             if (password_verify($password, $row['password_hash'])) {
                 $this->actualizarUltimoAcceso($row['id_usuario']);

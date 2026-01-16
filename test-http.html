@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test HTTP - Empresas</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #f0f0f0; }
+        .box { background: white; padding: 20px; margin: 10px 0; border-radius: 5px; border-left: 4px solid #007bff; }
+        button { padding: 10px 15px; background: #007bff; color: white; border: none; cursor: pointer; margin: 5px; border-radius: 3px; }
+        button:hover { background: #0056b3; }
+        .error { color: red; }
+        .success { color: green; }
+        .output { background: #1e1e1e; color: #00ff00; padding: 15px; border-radius: 5px; max-height: 500px; overflow-y: auto; font-size: 12px; white-space: pre-wrap; word-break: break-all; }
+    </style>
+</head>
+<body>
+    <h1>Test HTTP - Cargar Empresas</h1>
+
+    <div class="box">
+        <h3>1. Login</h3>
+        <button onclick="testLogin()">📝 Hacer Login</button>
+        <div id="login-output" class="output" style="display:none;"></div>
+    </div>
+
+    <div class="box">
+        <h3>2. Cargar Empresas CON TOKEN</h3>
+        <button onclick="testEmpresas()">📊 Cargar Empresas</button>
+        <div id="empresas-output" class="output" style="display:none;"></div>
+    </div>
+
+    <div class="box">
+        <h3>3. Cargar Empresas SIN TOKEN</h3>
+        <button onclick="testEmpresasSinToken()">❌ Sin Token</button>
+        <div id="sin-token-output" class="output" style="display:none;"></div>
+    </div>
+
+    <script>
+        const API_URL = '/GestorX/gestorx-backend/api';
+        let globalToken = null;
+
+        function mostrar(id, content, isError = false) {
+            const el = document.getElementById(id);
+            el.textContent = content;
+            el.style.display = 'block';
+            if (isError) el.classList.add('error');
+            else el.classList.add('success');
+        }
+
+        async function testLogin() {
+            const output = 'login-output';
+            document.getElementById(output).style.display = 'block';
+            document.getElementById(output).innerHTML = '⏳ Enviando login...';
+
+            try {
+                const response = await fetch(`${API_URL}/auth.php`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'login',
+                        correo: 'maestro@gestorx.test',
+                        password: 'Maestro@2026'
+                    })
+                });
+
+                const text = await response.text();
+                document.getElementById(output).innerHTML = `Status: ${response.status}\n\n${text}`;
+
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success && data.token) {
+                        globalToken = data.token;
+                        document.getElementById(output).innerHTML += `\n✅ Token guardado\nID Empresa: ${data.user.id_empresa}`;
+                    }
+                } catch (e) {
+                    document.getElementById(output).innerHTML += `\n⚠️ Respuesta no es JSON válido`;
+                }
+            } catch (error) {
+                mostrar(output, `❌ Error: ${error.message}`, true);
+            }
+        }
+
+        async function testEmpresas() {
+            const output = 'empresas-output';
+            document.getElementById(output).style.display = 'block';
+            document.getElementById(output).innerHTML = '⏳ Cargando empresas...';
+
+            if (!globalToken) {
+                document.getElementById(output).innerHTML = '❌ Primero haz login';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/empresas.php`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${globalToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const text = await response.text();
+                document.getElementById(output).innerHTML = `Status: ${response.status}\n\n${text}`;
+
+                try {
+                    const data = JSON.parse(text);
+                    if (data.success) {
+                        document.getElementById(output).innerHTML += `\n✅ ${data.total} empresas encontradas`;
+                    }
+                } catch (e) {
+                    document.getElementById(output).innerHTML += `\n⚠️ Respuesta no es JSON válido: ${e.message}`;
+                }
+            } catch (error) {
+                mostrar(output, `❌ Error: ${error.message}`, true);
+            }
+        }
+
+        async function testEmpresasSinToken() {
+            const output = 'sin-token-output';
+            document.getElementById(output).style.display = 'block';
+            document.getElementById(output).innerHTML = '⏳ Intentando sin token...';
+
+            try {
+                const response = await fetch(`${API_URL}/empresas.php`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const text = await response.text();
+                const status = `${response.status} ${response.statusText}`;
+                document.getElementById(output).innerHTML = `${status}\n\n${text}`;
+
+                if (response.status === 401) {
+                    document.getElementById(output).innerHTML += '\n✅ Correcto: rechaza sin token';
+                } else {
+                    document.getElementById(output).innerHTML += '\n⚠️ Debería rechazar con 401';
+                }
+            } catch (error) {
+                mostrar(output, `❌ Error: ${error.message}`, true);
+            }
+        }
+    </script>
+</body>
+</html>
