@@ -223,4 +223,18 @@ CREATE TABLE notificacion (
   FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- TABLA: RECUPERACION_PASSWORD
+CREATE TABLE recuperacion_password (
+  id_recuperacion INT AUTO_INCREMENT PRIMARY KEY,
+  id_usuario INT NOT NULL,
+  token VARCHAR(255) NOT NULL UNIQUE,
+  fecha_creacion DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  fecha_expiracion DATETIME NOT NULL,
+  estado_token ENUM('vigente','usado','expirado') DEFAULT 'vigente',
+  FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE,
+  INDEX idx_token (token),
+  INDEX idx_usuario (id_usuario),
+  INDEX idx_estado (estado_token)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 SET FOREIGN_KEY_CHECKS = 1;
